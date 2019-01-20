@@ -17,6 +17,7 @@ const accountRouter=express.Router()
 const accountController=require(path.join(__dirname,'../controllers/acountController.js'))
 
 accountRouter.get('/register',accountController.getRegisterPage)
+accountRouter.post('/register',accountController.register)
 
 //导出路由
 module.exports=accountRouter

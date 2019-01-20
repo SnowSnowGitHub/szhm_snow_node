@@ -5,8 +5,8 @@
 <head>
     <title>欢迎注册</title>
     <link rel="stylesheet" type="text/css" href="/lib/bootstrap/css/bootstrap.min.css">
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/md5.js"></script>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/md5.js"></script>
 </head>
 
 <body>
@@ -41,19 +41,37 @@
     </div>
 </body>
 <script>
-    function register(){
-        //1.获取到用户输入的信息
-        const username = $("#usernameId").val()
-        const password = $.md5($("#passwordId").val()+"DZH!@#love")
+    // function register(){
+    //     //1.获取到用户输入的信息
+    //     const username = $("#usernameId").val()
+    //     const password = $.md5($("#passwordId").val()+"DZH!@#love")
 
-        //2.使用$.post发送post请求
-        jQuery.post('/account/register',{username,password},function(data, textStatus, jqXHR){
-            if(data.status != 0){//失败
-                alert(data.message)
-            }else{//成功
-                location.href = '/account/login'
+    //     //2.使用$.post发送post请求
+    //     jQuery.post('/account/register',{username,password},function(data, textStatus, jqXHR){
+    //         if(data.status != 0){//失败
+    //             alert(data.message)
+    //         }else{//成功
+    //             location.href = '/account/login'
+    //         }
+    //     })
+    // }
+
+    function register(){
+        const username=$('#usernameId').val()
+        const password=$.md5($('#passwordId').val())
+
+        //这是另一种 jQuery中ajax请求的方式 也可以使用之前的方法
+        $.post('/account/register',{username,password},function(res){
+            if(res.status!=0){
+                alert(res.message)
+            }else{
+                alert("注册成功")
+                // location.href='/account/register'
             }
         })
     }
+
+
+
 </script>
 </html>
