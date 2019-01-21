@@ -24,32 +24,35 @@ exports.register=(req,res)=>{
         message:'注册成功'
     }
 
+    //拿到浏览器传递过来的数据 
     const {username,password}=req.body
-    MongoClient.connect(url, function (err, client) {
+    MongoClient.connect(url,{ useNewUrlParser: true },function (err, client) {
         console.log("Connected successfully to server");
         //操作数据库的一个db对象
         const db = client.db(dbName);
         // Get the documents collection 拿到要操作的集合
         const collection = db.collection('accountInfo');
 
-        collection.findOne({username},(err, docs)=>{
-            // console.log(docs)
-            if(docs){
+        collection.findOne({username},(err, result1)=>{
+            //如果result1==null表示没有查询到, 就可以插入  如果查询到了就说明用户名已经存在
+            // console.log(result1)
+            if(result1){
                 result.status=1,
                 result.message="用户名已经存在"
-
                 //关闭数据库连接
                 client.close();
                 res.json(result)
             }else{
-                collection.insertOne(req.body,(err,result)=>{
-                    if(result){
+                //如果用户名不存在 插入到数据库中
+                collection.insertOne(req.body,(err,result2)=>{
+                    // 这里的result 如果有值就表示插入成功 如果没有值就表示插入失败
+                    console.log(result2)
+                    if(!result2){
                         result.status=2,
                         result.message="注册失败"
-                        //关闭数据库连接
-                        client.close();
-                        res.json(result)
                     }
+                    client.close();
+                    res.json(result)
                   })
             }
         });
@@ -58,6 +61,66 @@ exports.register=(req,res)=>{
 
 }
 
+exports.getLoginPage=(req,res)=>{
+    res.sendFile(path.join(__dirname,'../public/views/login.html'))
+}
+
+//导入第三方包 captchapng 生成带有数字的验证码
+const captchapng = require('captchapng');
+exports.getVcode=(req,res)=>{
+    const vcode=parseInt(Math.random()*9000+1000)
+    req.session.vcode=vcode
+    var p = new captchapng(80,30,vcode); // width,height,numeric captcha
+        p.color(0, 0, 0, 0);  // First color: background (red, green, blue, alpha)
+        p.color(80, 80, 80, 255); // Second color: paint (red, green, blue, alpha)
+ 
+        var img = p.getBase64();
+        var imgbase64 = new Buffer(img,'base64');
+        res.writeHead(200, {
+            'Content-Type': 'image/png'
+        });
+        res.end(imgbase64);
+}
+
+exports.login=(req,res)=>{
+    const resultLogin={
+        status:0,
+        message:"登录成功"
+    }
+    //在这里把浏览器传递过来的 用户名 用户密码 验证码(和req.session.vcode中的验证码对比)
+    const vcodeImg=req.session.vcode
+    const {username,password,vcodeInput}=req.body
+    console.log(vcodeImg,vcodeInput)
+    if(vcodeImg!=vcodeInput){
+        resultLogin.status=1
+        resultLogin.message="验证码错误"
+        res.json(resultLogin)
+    }else{
+        MongoClient.connect(url, { useNewUrlParser: true },function(err, client) {
+            console.log("Connected successfully to server");
+            //操作数据库的一个db对象
+            const db = client.db(dbName);
+            // Get the documents collection 拿到要操作的集合
+            const collection = db.collection('accountInfo');
+           
+            collection.findOne({username,password},(err, result3)=>{
+            console.log(result3)
+            if(!result3){
+                resultLogin.status=2
+                resultLogin.message="用户名或密码错误"   
+            }
+            client.close();
+            res.json(resultLogin)
+          });
+          })
+          
+    }
+    
+}
+
+exports.getIndexPage=(req,res)=>{
+    res.sendFile(path.join(__dirname,'../public/views/index.html'))
+}
 
 
 
