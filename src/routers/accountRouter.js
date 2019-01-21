@@ -14,7 +14,6 @@ const path=require('path')
 //创建路由
 const accountRouter=express.Router()
 //导入控制模块
-
 const accountController=require(path.join(__dirname,'../controllers/acountController.js'))
 
 //获取注册页面
@@ -27,8 +26,7 @@ accountRouter.get('/login',accountController.getLoginPage)
 accountRouter.get('/vcode',accountController.getVcode)
 //获取登录页面请求
 accountRouter.post('/login',accountController.login)
-//获取主页面
-accountRouter.get('/index',accountController.getIndexPage)
+
 //导出路由
 module.exports=accountRouter
 

@@ -64,6 +64,10 @@
         $(this).attr('src',`/account/vcode?a=${Math.random()}`)
     })
 
+    //点击注册按钮
+    function register(){
+        location.href="/account/register"
+    }
 
     //点击登录请求
     function login(){
@@ -78,7 +82,7 @@
         $.post('/account/login',{username,password,vcodeInput},function(res){
             console.log(res)
             if(res.status==0){
-                location.href="/account/index"
+                location.href="/stuManager/parent"
             }else{
                 alert(res.message)
                 $(this).attr('src',`/account/vcode?a=${Math.random()}`)

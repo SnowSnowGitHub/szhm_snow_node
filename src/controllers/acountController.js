@@ -7,11 +7,8 @@
 
 */
 const path=require('path')
-const MongoClient = require('mongodb').MongoClient;
-// Connection URL
-const url = 'mongodb://localhost:27017';
-const dbName = 'muzi';
-
+//导入数据库操作模块
+const databasetool=require(path.join(__dirname,'../tools/databasetool.js'))
 
 exports.getRegisterPage=(req,res)=>{
     //内部就是对 fs.readFile 的封装
@@ -19,45 +16,73 @@ exports.getRegisterPage=(req,res)=>{
 }
 
 exports.register=(req,res)=>{
-    const result={
+    const resultRegister={
         status:0,
         message:'注册成功'
     }
 
     //拿到浏览器传递过来的数据 
     const {username,password}=req.body
-    MongoClient.connect(url,{ useNewUrlParser: true },function (err, client) {
-        console.log("Connected successfully to server");
-        //操作数据库的一个db对象
-        const db = client.db(dbName);
-        // Get the documents collection 拿到要操作的集合
-        const collection = db.collection('accountInfo');
-
-        collection.findOne({username},(err, result1)=>{
-            //如果result1==null表示没有查询到, 就可以插入  如果查询到了就说明用户名已经存在
+    databasetool.findeSingle('accountInfo',{username},(err,result)=>{
+        //如果result1==null表示没有查询到, 就可以插入  如果查询到了就说明用户名已经存在
             // console.log(result1)
-            if(result1){
-                result.status=1,
-                result.message="用户名已经存在"
-                //关闭数据库连接
-                client.close();
-                res.json(result)
-            }else{
-                //如果用户名不存在 插入到数据库中
-                collection.insertOne(req.body,(err,result2)=>{
-                    // 这里的result 如果有值就表示插入成功 如果没有值就表示插入失败
-                    console.log(result2)
-                    if(!result2){
-                        result.status=2,
-                        result.message="注册失败"
-                    }
-                    client.close();
-                    res.json(result)
-                  })
-            }
-        });
+            if(result){
+                resultRegister.status=1,
+                resultRegister.message="用户名已经存在"
 
+                res.json(resultRegister)
+            }else{
+                databasetool.insertSingle('accountInfo',req.body,(err,result)=>{
+                    // 这里的result 如果有值就表示插入成功 如果没有值就表示插入失败
+                    // console.log(result)
+                    if(!result){
+                        resultRegister.status=2,
+                        resultRegister.message="注册失败"
+                    }
+
+                    res.json(resultRegister)
+                })
+            }
     })
+
+
+    //之前操作数据库的方法
+    // const MongoClient = require('mongodb').MongoClient;
+    // // Connection URL
+    // const url = 'mongodb://localhost:27017';
+    // const dbName = 'muzi';
+    // MongoClient.connect(url,{ useNewUrlParser: true },function (err, client) {
+    //     console.log("Connected successfully to server");
+    //     //操作数据库的一个db对象
+    //     const db = client.db(dbName);
+    //     // Get the documents collection 拿到要操作的集合
+    //     const collection = db.collection('accountInfo');
+
+    //     collection.findOne({username},(err, result1)=>{
+    //         //如果result1==null表示没有查询到, 就可以插入  如果查询到了就说明用户名已经存在
+    //         // console.log(result1)
+    //         if(result1){
+    //             result.status=1,
+    //             result.message="用户名已经存在"
+    //             //关闭数据库连接
+    //             client.close();
+    //             res.json(result)
+    //         }else{
+    //             //如果用户名不存在 插入到数据库中
+    //             collection.insertOne(req.body,(err,result2)=>{
+    //                 // 这里的result 如果有值就表示插入成功 如果没有值就表示插入失败
+    //                 console.log(result2)
+    //                 if(!result2){
+    //                     result.status=2,
+    //                     result.message="注册失败"
+    //                 }
+    //                 client.close();
+    //                 res.json(result)
+    //               })
+    //         }
+    //     });
+
+    // })
 
 }
 
@@ -75,12 +100,14 @@ exports.getVcode=(req,res)=>{
         p.color(80, 80, 80, 255); // Second color: paint (red, green, blue, alpha)
  
         var img = p.getBase64();
-        var imgbase64 = new Buffer(img,'base64');
+        var imgbase64 = Buffer.from(img,'base64');
         res.writeHead(200, {
             'Content-Type': 'image/png'
         });
         res.end(imgbase64);
 }
+
+
 
 exports.login=(req,res)=>{
     const resultLogin={
@@ -96,30 +123,40 @@ exports.login=(req,res)=>{
         resultLogin.message="验证码错误"
         res.json(resultLogin)
     }else{
-        MongoClient.connect(url, { useNewUrlParser: true },function(err, client) {
-            console.log("Connected successfully to server");
-            //操作数据库的一个db对象
-            const db = client.db(dbName);
-            // Get the documents collection 拿到要操作的集合
-            const collection = db.collection('accountInfo');
-           
-            collection.findOne({username,password},(err, result3)=>{
-            console.log(result3)
-            if(!result3){
+        databasetool.findeSingle('accountInfo',{username,password},(err,result)=>{
+            if(!result){
                 resultLogin.status=2
                 resultLogin.message="用户名或密码错误"   
             }
-            client.close();
             res.json(resultLogin)
-          });
-          })
+        })
+
+
+        //之前数据库操作
+        // MongoClient.connect(url, { useNewUrlParser: true },function(err, client) {
+        //     console.log("Connected successfully to server");
+        //     //操作数据库的一个db对象
+        //     const db = client.db(dbName);
+        //     // Get the documents collection 拿到要操作的集合
+        //     const collection = db.collection('accountInfo');
+           
+        //     collection.findOne({username,password},(err, result3)=>{
+        //     console.log(result3)
+        //     if(!result3){
+        //         resultLogin.status=2
+        //         resultLogin.message="用户名或密码错误"   
+        //     }
+        //     client.close();
+        //     res.json(resultLogin)
+        //   });
+        //   })
           
     }
     
 }
 
-exports.getIndexPage=(req,res)=>{
-    res.sendFile(path.join(__dirname,'../public/views/index.html'))
+exports.getStuManagerPage=(req,res)=>{
+    res.sendFile(path.join(__dirname,'../public/views/parent.html'))
 }
 
 

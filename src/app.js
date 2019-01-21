@@ -11,7 +11,7 @@ app.use(session({
     secret: 'keyboard cat',//加密字符串也可以写数组 用来对session id相关的cookie进行签名
     resave: false,//是否每次都重新保存会话  建议设置成false
     saveUninitialized: true,  //是否自动保存未初始化的会话的内容
-    cookie: { maxAge: 600000 }  //保存的时效
+    cookie: { maxAge: 600000 }  //保存的时效 
   }))
 
 // parse application/x-www-form-urlencoded
@@ -24,7 +24,9 @@ app.use(express.static(path.join(__dirname,'public')))
 
 //导入路由对象  路由中间件要写在最后
 const accountRouter=require(path.join(__dirname,'routers/accountRouter.js'))
+const stuManagerRouter=require(path.join(__dirname,'routers/stuManagerRouter.js'))
 app.use('/account',accountRouter)
+app.use('/stuManager',stuManagerRouter)
 
 
 
