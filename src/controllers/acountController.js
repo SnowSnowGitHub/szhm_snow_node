@@ -117,7 +117,7 @@ exports.login=(req,res)=>{
     //在这里把浏览器传递过来的 用户名 用户密码 验证码(和req.session.vcode中的验证码对比)
     const vcodeImg=req.session.vcode
     const {username,password,vcodeInput}=req.body
-    console.log(vcodeImg,vcodeInput)
+    // console.log(vcodeImg,vcodeInput)
     if(vcodeImg!=vcodeInput){
         resultLogin.status=1
         resultLogin.message="验证码错误"
@@ -127,6 +127,8 @@ exports.login=(req,res)=>{
             if(!result){
                 resultLogin.status=2
                 resultLogin.message="用户名或密码错误"   
+            }else{
+                req.session.loginName=username
             }
             res.json(resultLogin)
         })
@@ -159,9 +161,13 @@ exports.getStuManagerPage=(req,res)=>{
     res.sendFile(path.join(__dirname,'../public/views/parent.html'))
 }
 
-
-
-
+// 注销的操作
+exports.loginout=(req,res)=>{
+    //清空session的用户名
+    req.session.loginName=null
+    //需要浏览器跳转到登录页面
+    res.send(`<script>location.href="/account/login"</script>`)
+}
 
 
 /*

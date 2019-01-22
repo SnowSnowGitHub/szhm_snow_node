@@ -26,7 +26,8 @@ accountRouter.get('/login',accountController.getLoginPage)
 accountRouter.get('/vcode',accountController.getVcode)
 //获取登录页面请求
 accountRouter.post('/login',accountController.login)
-
+//退出登录请求
+accountRouter.get('/loginout',accountController.loginout)
 //导出路由
 module.exports=accountRouter
 

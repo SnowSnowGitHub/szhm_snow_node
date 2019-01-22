@@ -82,7 +82,7 @@
         $.post('/account/login',{username,password,vcodeInput},function(res){
             console.log(res)
             if(res.status==0){
-                location.href="/stuManager/parent"
+                location.href="/stuManager/list"
             }else{
                 alert(res.message)
                 $(this).attr('src',`/account/vcode?a=${Math.random()}`)

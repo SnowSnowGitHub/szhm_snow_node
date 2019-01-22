@@ -22,6 +22,23 @@ app.use(bodyParser.json())
 //设置静态资源文件根目录
 app.use(express.static(path.join(__dirname,'public')))
 
+
+//拦截到所有的请求
+app.all('/*',(req,res,next)=>{
+    if(req.url.includes('account')){
+        //执行下一个中间件
+        next()
+    }else{
+        if(req.session.loginName){
+            next()
+        }else{
+            res.send(`<script>alert("您还没有登录, 请先登录");location.href="/account/login"</script>`)
+        }
+    }
+})
+
+
+
 //导入路由对象  路由中间件要写在最后
 const accountRouter=require(path.join(__dirname,'routers/accountRouter.js'))
 const stuManagerRouter=require(path.join(__dirname,'routers/stuManagerRouter.js'))
@@ -34,6 +51,8 @@ app.listen(4000,'127.0.0.1',err=>{
     if(err) console.log(err)
     console.log('start ok')
 })
+
+
 
 
 
